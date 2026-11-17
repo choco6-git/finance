@@ -129,12 +129,13 @@ export async function suggestDeliverables(
   if (trimmed.length < MIN_QUERY_LENGTH) return [];
 
   const apiKey = process.env.OPENAI_API_KEY;
+  const baseURL = process.env.OPENAI_BASE_URL;
   // No key is a normal state in self-hosted mode, not an error - the feature
   // just stays dark and the picker behaves exactly as it did before.
   if (!apiKey) return [];
 
   try {
-    const openai = createOpenAI({ apiKey });
+    const openai = createOpenAI({ apiKey, baseURL });
     const { object } = await generateObject({
       model: openai(model),
       schema: suggestionSchema,

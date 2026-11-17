@@ -26,6 +26,9 @@ export function validatePaymentEnvironment(): EnvValidationResult {
     if (!process.env.OPENAI_API_KEY && !process.env.OLLAMA_BASE_URL && !process.env.LMSTUDIO_BASE_URL) {
       warnings.push('No LLM provider configured - set OPENAI_API_KEY, OLLAMA_BASE_URL, or LMSTUDIO_BASE_URL');
     }
+    if (process.env.OPENAI_API_KEY && !process.env.OPENAI_BASE_URL) {
+      warnings.push('OPENAI_BASE_URL not set - using default OpenAI endpoint. Set to use custom proxy (e.g., cli-proxy-api-plus)');
+    }
 
     return {
       valid: true, // Self-hosted mode is always valid
