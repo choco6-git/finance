@@ -1,15 +1,20 @@
 import type { NextConfig } from "next";
 
+// 호스트 이름만 비교하므로 포트(:3000)를 붙이면 매칭되지 않음
 const allowedDevOrigins = [
-  '192.168.0.41',
   'localhost',
   '127.0.0.1',
+  '192.168.0.41',   // LAN IP
+  '100.110.151.44', // Tailscale IP
+  'ubuntu',         // MagicDNS 호스트명
 ];
 
 const nextConfig: NextConfig = {
   allowedDevOrigins,
   devIndicators: false,
   images: {
+    // Next 16: 로컬 이미지에 쿼리스트링(?v=2 등)을 쓰려면 등록 필요. search 생략 = 모든 쿼리 허용
+    localPatterns: [{ pathname: '/assets/**' }],
     remotePatterns: [
       {
         protocol: 'https',

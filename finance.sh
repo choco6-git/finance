@@ -35,19 +35,20 @@ case "${1:-help}" in
     ;;
 
   stop)
-    if [[ ! -f "$PID_FILE" ]]; then
-      echo "PID 파일 없음. 프로세스 직접 찾기..."
-      PIDS=$(pgrep -f "next.*dev.*turbo" | head -5)
-    else
-      PIDS=$(cat "$PID_FILE")
-    fi
+    # PID 파일(pnpm)이 stale이어도 실제 next 프로세스와 포트 점유 프로세스까지 정리
+    PIDS=""
+    [[ -f "$PID_FILE" ]] && PIDS="$(cat "$PID_FILE")"
+    PIDS="$PIDS $(pgrep -f "$PROJECT_DIR/node_modules/.*next dev" || true)"
+    PIDS="$PIDS $(ss -tlnpH "sport = :$PORT" | grep -oP 'pid=\K[0-9]+' || true)"
+    PIDS=$(echo $PIDS | tr ' ' '\n' | sort -u | tr '\n' ' ')
+    PIDS="${PIDS% }"
     if [[ -n "${PIDS:-}" ]]; then
       for pid in $PIDS; do
         if kill -0 "$pid" 2>/dev/null; then
           echo "중지 중: $pid"
-          kill -TERM "$pid"
+          kill -TERM "$pid" 2>/dev/null || true
           sleep 1
-          kill -0 "$pid" 2>/dev/null && kill -KILL "$pid"
+          kill -0 "$pid" 2>/dev/null && kill -KILL "$pid" 2>/dev/null || true
         fi
       done
       echo "중지됨"
